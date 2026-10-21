@@ -156,6 +156,7 @@ class Cycle(Action):
 DEFAULT_ACTION_TYPES: tuple[type[Action], ...] = (
     JunctionMove,
     Cycle,
+    core_gates.R,
     core_gates.Rx,
     core_gates.Ry,
     core_gates.Rz,

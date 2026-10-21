@@ -139,6 +139,7 @@ class PhysicalSwap(TransportAction):
 DEFAULT_ACTION_TYPES: tuple[type[_Action], ...] = (
     PhysicalSwap,
     Shuttle,
+    core_gates.R,
     core_gates.Rx,
     core_gates.Ry,
     core_gates.Rz,

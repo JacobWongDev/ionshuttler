@@ -20,7 +20,7 @@ from .._json_utils import require_int, require_list, require_number, require_str
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-SINGLE_QUBIT_GATE_NAMES = frozenset({"rx", "ry", "rz"})
+SINGLE_QUBIT_GATE_NAMES = frozenset({"r", "rx", "ry", "rz"})
 TWO_QUBIT_GATE_NAMES = frozenset({"rxx", "ryy", "rzz"})
 GATE_NAMES = SINGLE_QUBIT_GATE_NAMES | TWO_QUBIT_GATE_NAMES
 
@@ -36,6 +36,7 @@ class GateTiming:
     single-qubit gates.
     """
 
+    r: int = 1
     rx: int = 1
     ry: int = 1
     rz: int = 0
@@ -131,6 +132,7 @@ class GateTiming:
             raise ValueError(msg)
         defaults = cls()
         return cls(
+            r=_mapping_duration(mapping, "r", defaults.r),
             rx=_mapping_duration(mapping, "rx", defaults.rx),
             ry=_mapping_duration(mapping, "ry", defaults.ry),
             rz=_mapping_duration(mapping, "rz", defaults.rz),
@@ -309,6 +311,16 @@ class TwoQubitGate(GateAction):
         values.update({name: require_number(data, name) for name in cls.parameter_names})
         return _construct_gate_action(cls, values)
 
+@dataclass(frozen=True)
+class R(SingleQubitGate):
+    """Rotate one ion around the x-y plane."""
+
+    parameter_names: ClassVar[tuple[str, ...]] = ("theta", "phi")
+    theta: float
+    phi: float
+    circuit_name: ClassVar[str] = "r"
+    serialized_type: ClassVar[str] = "gate.r"
+
 
 @dataclass(frozen=True)
 class Rx(SingleQubitGate):
@@ -371,12 +383,12 @@ class Rzz(TwoQubitGate):
 class GlobalGate(GateAction):
     """Apply one single-ion rotation to several ions through global control.
 
-    ``gate_name`` is the circuit name of the rotation: ``"rx"``, ``"ry"``, or
-    ``"rz"``. ``ions`` lists every target ion explicitly and is stored in
-    ascending order; code that applies a gate to all ions resolves them when it
-    creates the gate. The gate takes the ordinary duration of its rotation. The
-    executing architecture decides which other operations may run at the same
-    time.
+    ``gate_name`` is the circuit name of the rotation: ``"r"``, ``"rx"``,
+    ``"ry"``, or ``"rz"``. ``ions`` lists every target ion explicitly and is
+    stored in ascending order; code that applies a gate to all ions resolves
+    them when itcreates the gate. The gate takes the ordinary duration of its
+    rotation. The executing architecture decides which other operations may run
+    at the same time.
     """
 
     gate_name: str
@@ -441,7 +453,7 @@ class GlobalGate(GateAction):
         return {**super().to_dict(), "ions": list(self.ions)}
 
 
-BUILTIN_GATE_TYPES: tuple[type[GateAction], ...] = (Rx, Ry, Rz, Rxx, Ryy, Rzz, GlobalGate)
+BUILTIN_GATE_TYPES: tuple[type[GateAction], ...] = (R, Rx, Ry, Rz, Rxx, Ryy, Rzz, GlobalGate)
 GATE_TYPES: Mapping[str, type[Action]] = index_action_types(BUILTIN_GATE_TYPES)
 
 
@@ -541,6 +553,7 @@ __all__ = [
     "GateAction",
     "GateTiming",
     "GlobalGate",
+    "R",
     "Rx",
     "Rxx",
     "Ry",

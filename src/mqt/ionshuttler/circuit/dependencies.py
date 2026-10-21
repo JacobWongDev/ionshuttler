@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import Gate
-from qiskit.circuit.library import RXGate, RXXGate, RYGate, RYYGate, RZGate, RZZGate
+from qiskit.circuit.library import RGate, RXGate, RXXGate, RYGate, RYYGate, RZGate, RZZGate
 from qiskit.converters import circuit_to_dagdependency
 
 from .model import Circuit
@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from mqt.ionshuttler.core.gates import GateAction
 
 _QISKIT_GATE_TYPES = {
+    "r": RGate,
     "rx": RXGate,
     "ry": RYGate,
     "rz": RZGate,
